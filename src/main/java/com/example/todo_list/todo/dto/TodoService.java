@@ -1,5 +1,6 @@
 package com.example.todo_list.todo.dto;
 
+import com.example.todo_list.exception.NotFoundException;
 import com.example.todo_list.todo.Todo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,7 @@ public class TodoService {
     }
 
     public TodoDto getById(Long id) {
-        Todo todo = todoRepository.findById(id).orElseThrow(() -> new RuntimeException("Todo not found"));
+        Todo todo = todoRepository.findById(id).orElseThrow(() -> new NotFoundException("Todo not found"));
         return TodoDto.builder()
                 .id(todo.getId())
                 .title(todo.getTitle())
@@ -49,7 +50,7 @@ public class TodoService {
     }
 
     public TodoDto updateById(Long id, TodoDto dto) {
-        Todo todo = todoRepository.findById(id).orElseThrow(() -> new RuntimeException("Todo not found"));
+        Todo todo = todoRepository.findById(id).orElseThrow(() -> new NotFoundException("Todo not found"));
         todo = Todo.builder()
                 .id(todo.getId())
                 .title(dto.getTitle())

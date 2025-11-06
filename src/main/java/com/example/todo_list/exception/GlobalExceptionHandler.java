@@ -2,19 +2,16 @@ package com.example.todo_list.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<CustomErrorResponse> handleRuntimeException(NotFoundException ex) {
-        CustomErrorResponse errorResponse = new CustomErrorResponse(
-                HttpStatus.NOT_FOUND.value(),
-                HttpStatus.NOT_FOUND.getReasonPhrase(),
-                ex.getMessage()
-        );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    public ErrorResponse handleRuntimeException(NotFoundException ex) {
+        return ErrorResponse.create(ex, HttpStatus.NOT_FOUND, ex.getMessage());
     }
 }

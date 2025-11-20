@@ -1,11 +1,15 @@
 package com.example.todo_list.user;
 
 
-import com.example.todo_list.user.dto.UserDto;
-import com.example.todo_list.user.dto.UserSignupDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 
 @RestController
@@ -19,10 +23,10 @@ public class UserController {
         return ResponseEntity.ok("Hello User!");
     }
 
-    @PostMapping("")
-    public ResponseEntity<UserDto> create(@RequestBody UserSignupDto userDto) {
-        UserDto createdUser = userService.create(userDto);
-        return ResponseEntity.ok(createdUser);
+
+    @GetMapping("/authenticated")
+    public ResponseEntity<String> authenticatedWithUserDetails(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok("Hello " + (userDetails != null ? userDetails.getUsername() : "anonymous"));
     }
 
 

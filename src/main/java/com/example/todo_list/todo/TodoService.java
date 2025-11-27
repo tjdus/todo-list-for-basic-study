@@ -2,8 +2,10 @@ package com.example.todo_list.todo;
 
 import com.example.todo_list.exception.NotFoundException;
 import com.example.todo_list.todo.dto.TodoDto;
+import com.example.todo_list.todo.dto.TodoResponseDto;
 import com.example.todo_list.user.User;
 import com.example.todo_list.user.UserRepository;
+import com.example.todo_list.user.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,12 +33,19 @@ public class TodoService {
                 .build();
     }
 
-    public List<TodoDto> getAll() {
-        return todoRepository.findAll().stream()
-                .map(todo -> TodoDto.builder()
+    public List<TodoResponseDto> getAll() {
+         return todoRepository.findAll().stream()
+                .map(todo -> TodoResponseDto.builder()
                         .id(todo.getId())
                         .title(todo.getTitle())
                         .completed(todo.getCompleted())
+                        .createdBy(
+                                UserDto.builder()
+                                        .id(todo.getCreatedBy().getId())
+                                        .name(todo.getCreatedBy().getName())
+                                        .username(todo.getCreatedBy().getUsername())
+                                        .build()
+                        )
                         .build())
                 .toList();
     }

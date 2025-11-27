@@ -73,7 +73,7 @@
     <div class="input-row">
         <input id="username" placeholder="아이디" autocomplete="username" />
         <input id="password" type="password" placeholder="비밀번호" autocomplete="new-password" />
-        <input id="nickname" placeholder="닉네임 (선택)" />
+        <input id="name" placeholder="닉네임 (선택)" />
         <button class="btn" id="btn-signup">회원가입</button>
         <button class="btn btn-secondary" id="btn-move-login">로그인으로 이동</button>
     </div>
@@ -91,14 +91,14 @@
     async function signup() {
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
-        const nickname = document.getElementById('nickname').value.trim();
+        const name = document.getElementById('name').value.trim();
         if (!username || !password) return showMessage('아이디와 비밀번호를 입력하세요.', true);
         showMessage('회원가입 요청 중...');
         try {
             const res = await fetch(SIGNUP_PATH, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password, nickname })
+                body: JSON.stringify({ username, password, name })
             });
             const data = await res.json();
             if (res.ok) {

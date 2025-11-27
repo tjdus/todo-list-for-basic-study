@@ -1,6 +1,7 @@
 package com.example.todo_list.todo;
 
 import com.example.todo_list.todo.dto.TodoDto;
+import com.example.todo_list.todo.dto.TodoResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,8 +17,8 @@ public class TodoController {
     private final TodoService todoService;
 
     @GetMapping("")
-    public ResponseEntity<List<TodoDto>> getAll() {
-        List<TodoDto> todos = todoService.getAll();
+    public ResponseEntity<List<TodoResponseDto>> getAll() {
+        List<TodoResponseDto> todos = todoService.getAll();
 
         return ResponseEntity.ok(todos);
     }
@@ -39,6 +40,14 @@ public class TodoController {
     public ResponseEntity<List<TodoDto>> getCompletedTodos(@RequestParam Boolean completed) {
         List<TodoDto> completedTodos = todoService.getCompletedTodos(completed);
         return ResponseEntity.ok(completedTodos);
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<TodoDto>> getMyTodos(@AuthenticationPrincipal UserDetails user) {
+        Long userId = Long.valueOf(user.getUsername());
+        List<TodoDto> myTodos = todoService.getByCreatedById(userId);
+        return ResponseEntity.ok(myTodos);
+
     }
 
     //id로 조회하기

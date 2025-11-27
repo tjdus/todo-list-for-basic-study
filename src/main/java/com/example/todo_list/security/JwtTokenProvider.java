@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
@@ -22,14 +23,14 @@ public class JwtTokenProvider {
     @Value("${jwt.expire-time:3600000}") // 기본 1시간
     private long expireTime;
 
+    @Value("${jwt.secret}")
+    private String secret;
+
     private SecretKey key;
 
     @PostConstruct
     public void init() {
-        SecretKey key = Keys.secretKeyFor(io.jsonwebtoken.SignatureAlgorithm.HS256);
-        String encodedKey = Base64.getEncoder().encodeToString(key.getEncoded());
-        this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(encodedKey));
-        System.out.println("JWT Secret Key: " + encodedKey);
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     // JWT 생성 (유저 ID를 subject 로 저장)

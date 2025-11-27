@@ -153,7 +153,6 @@
             li.className = 'todo-card';
             li.innerHTML = `
                 <div class="todo-title" style="display:flex;align-items:center;gap:8px;">
-                    <span style="font-size:1.2em;">${todo.completed ? '✅' : '🕒'}</span>
                     <span>${todo.title}</span>
                 </div>
                 <div style="font-size:0.97em;color:#666;">상태: <b style="color:${todo.completed ? '#1976d2' : '#e53935'}">${todo.completed ? '완료' : '미완료'}</b></div>

@@ -16,8 +16,8 @@ public class TodoService {
     private final TodoRepository todoRepository;
     private final UserRepository userRepository;
 
-    public TodoDto create(TodoDto dto) {
-        User user = userRepository.findById(dto.getCreatedBy()).orElseThrow(() -> new NotFoundException("User not found"));
+    public TodoDto create(Long userId, TodoDto dto) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
         Todo todo = Todo.builder()
                 .title(dto.getTitle())
                 .completed(dto.getCompleted())

@@ -3,6 +3,8 @@ package com.example.todo_list.todo;
 import com.example.todo_list.todo.dto.TodoDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,8 +23,9 @@ public class TodoController {
     }
 
     @PostMapping("")
-    public ResponseEntity<TodoDto> create(@RequestBody TodoDto dto) {
-        TodoDto createdTodo = todoService.create(dto);
+    public ResponseEntity<TodoDto> create(@RequestBody TodoDto dto, @AuthenticationPrincipal UserDetails user) {
+        Long userId = Long.valueOf(user.getUsername());
+        TodoDto createdTodo = todoService.create(userId, dto);
         return ResponseEntity.ok(createdTodo);
     }
 

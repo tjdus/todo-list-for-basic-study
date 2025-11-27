@@ -88,9 +88,9 @@
 </head>
 <body>
 <div class="container">
-    <h2>📝 Todo List API 테스트</h2>
+    <h2>📝 Todo List</h2>
     <div class="input-row">
-        <input id="search-keyword" placeholder="검색어로 제목 검색" />
+        <input id="search-keyword" placeholder="제목 검색" />
         <select id="filter-completed">
             <option value="">전체</option>
             <option value="true">완료</option>
@@ -100,13 +100,16 @@
         <button class="btn btn-secondary" id="btn-refresh">전체목록</button>
     </div>
     <div class="input-row">
-        <input id="title" placeholder="새 할 일 제목" />
-        <input id="description" placeholder="설명 (선택)" />
+        <input id="title" placeholder="할 일 제목" />
+        <select id="completed">
+            <option value="false">미완료</option>
+            <option value="true">완료</option>
+        </select>
         <button class="btn" id="btn-create">추가</button>
     </div>
-    <div style="margin-bottom:10px;">
+    <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;">
         <button class="btn btn-secondary" id="btn-logout">로그아웃</button>
-        <span id="token-status" style="font-size:0.95em;color:#888;margin-left:8px;"></span>
+        <span id="token-status" style="font-size:0.95em;color:#888;"></span>
     </div>
     <h3>Todo 목록</h3>
     <ul class="todo-list" id="todo-list"></ul>
@@ -142,20 +145,21 @@
     function renderTodos(todos) {
         todoList.innerHTML = '';
         if (!todos || todos.length === 0) {
-            todoList.innerHTML = '<li style="color:#888;">할 일이 없습니다.</li>';
+            todoList.innerHTML = '<li style="color:#888;text-align:center;">할 일이 없습니다.</li>';
             return;
         }
         todos.forEach(todo => {
             const li = document.createElement('li');
             li.className = 'todo-card';
             li.innerHTML = `
-                <div class="todo-title">${todo.title} ${todo.completed ? '✅' : ''}</div>
-                <div style="color:#666;font-size:0.97em;">${todo.description || ''}</div>
-                <div style="font-size:0.93em;color:#aaa;">ID: ${todo.id} | 작성자: ${todo.createdById ?? '-'} </div>
+                <div class="todo-title" style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:1.2em;">${todo.completed ? '✅' : '🕒'}</span>
+                    <span>${todo.title}</span>
+                </div>
+                <div style="font-size:0.97em;color:#666;">상태: <b style="color:${todo.completed ? '#1976d2' : '#e53935'}">${todo.completed ? '완료' : '미완료'}</b></div>
+                <div style="font-size:0.93em;color:#aaa;">ID: ${todo.id ?? '-'} | 작성자: ${todo.createdBy ?? '-'}</div>
                 <div class="todo-actions">
-                    <button class="btn btn-secondary" onclick="editTodo(${todo.id}, '${todo.title.replace(/'/g, "\\'")}', '${(todo.description||'').replace(/'/g, "\\'")}', ${todo.completed})">수정</button>
                     <button class="btn btn-danger" onclick="deleteTodo(${todo.id})">삭제</button>
-                    <button class="btn" onclick="toggleComplete(${todo.id}, ${!todo.completed})">${todo.completed ? '미완료로' : '완료로'}</button>
                 </div>
             `;
             todoList.appendChild(li);
@@ -176,20 +180,20 @@
 
     async function createTodo() {
         const title = document.getElementById('title').value.trim();
-        const description = document.getElementById('description').value.trim();
+        const completed = document.getElementById('completed').value === 'true';
         if (!title) return showMessage('제목을 입력하세요.', true);
         showMessage('추가 중...');
         try {
             const res = await fetch(TODOS_PATH, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', ...tokenHeader() },
-                body: JSON.stringify({ title, description })
+                body: JSON.stringify({ title, completed })
             });
             const data = await res.json();
             if (res.ok) {
                 showMessage('추가 성공!');
                 document.getElementById('title').value = '';
-                document.getElementById('description').value = '';
+                document.getElementById('completed').value = 'false';
                 fetchTodos();
             } else {
                 showMessage('에러: ' + (data.message || JSON.stringify(data)), true);
@@ -219,52 +223,6 @@
         }
     }
 
-    async function toggleComplete(id, completed) {
-        showMessage('상태 변경 중...');
-        try {
-            const res = await fetch(`${TODOS_PATH}/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', ...tokenHeader() },
-                body: JSON.stringify({ completed })
-            });
-            const data = await res.json();
-            if (res.ok) {
-                showMessage('상태 변경 성공!');
-                fetchTodos();
-            } else {
-                showMessage('에러: ' + (data.message || JSON.stringify(data)), true);
-            }
-        } catch (e) {
-            showMessage('에러: ' + e, true);
-        }
-    }
-
-    // 수정 다이얼로그(간단하게 prompt 사용)
-    window.editTodo = async function(id, oldTitle, oldDesc, completed) {
-        const title = prompt('새 제목:', oldTitle);
-        if (title === null) return;
-        const description = prompt('새 설명:', oldDesc);
-        if (description === null) return;
-        showMessage('수정 중...');
-        try {
-            const res = await fetch(`${TODOS_PATH}/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', ...tokenHeader() },
-                body: JSON.stringify({ title, description, completed })
-            });
-            const data = await res.json();
-            if (res.ok) {
-                showMessage('수정 성공!');
-                fetchTodos();
-            } else {
-                showMessage('에러: ' + (data.message || JSON.stringify(data)), true);
-            }
-        } catch (e) {
-            showMessage('에러: ' + e, true);
-        }
-    }
-
-    // 검색
     async function searchTodos() {
         const keyword = document.getElementById('search-keyword').value.trim();
         if (!keyword) return fetchTodos();
@@ -281,7 +239,6 @@
         }
     }
 
-    // 완료/미완료 필터
     async function filterCompleted() {
         const val = document.getElementById('filter-completed').value;
         if (val === '') return fetchTodos();
@@ -298,20 +255,16 @@
         }
     }
 
-    // 로그아웃
     document.getElementById('btn-logout').addEventListener('click', () => {
         localStorage.removeItem('authToken');
         showTokenStatus();
         showMessage('로그아웃 되었습니다.');
         todoList.innerHTML = '';
     });
-
     document.getElementById('btn-create').addEventListener('click', createTodo);
     document.getElementById('btn-refresh').addEventListener('click', fetchTodos);
     document.getElementById('btn-search').addEventListener('click', searchTodos);
     document.getElementById('filter-completed').addEventListener('change', filterCompleted);
-
-    // 최초 로딩 시
     fetchTodos();
 </script>
 </body>
